@@ -98,7 +98,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
 			reader.readAsDataURL(file);
 		});
-	}, [maxSizeBytes, onError]);
+	}, [onError]);
 
 	const addImages = useCallback(async (files: File[]) => {
 		setIsProcessing(true);
