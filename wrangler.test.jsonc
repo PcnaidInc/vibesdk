@@ -1,0 +1,67 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "vibesdk-test",
+	"main": "worker/index.ts",
+	"compatibility_date": "2025-08-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "vibesdk-db-test",
+			"database_id": "test-db",
+			"migrations_dir": "migrations"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"class_name": "CodeGeneratorAgent",
+				"name": "CodeGenObject"
+			},
+			{
+				"class_name": "UserAppSandboxService",
+				"name": "Sandbox"
+			},
+			{
+				"class_name": "DORateLimitStore",
+				"name": "DORateLimitStore"
+			}
+		]
+	},
+	"kv_namespaces": [
+		{
+			"binding": "VibecoderStore",
+			"id": "test-kv"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "TEMPLATES_BUCKET",
+			"bucket_name": "vibesdk-templates-test"
+		}
+	],
+	"vars": {
+		"TEMPLATES_REPOSITORY": "https://github.com/cloudflare/vibesdk-templates",
+		"DISPATCH_NAMESPACE": "vibesdk-test-namespace",
+		"CLOUDFLARE_AI_GATEWAY": "vibesdk-gateway-test",
+		"MAX_SANDBOX_INSTANCES": "2",
+		"SANDBOX_INSTANCE_TYPE": "standard-3"
+	},
+	"migrations": [
+		{
+			"new_sqlite_classes": [
+				"CodeGeneratorAgent",
+				"UserAppSandboxService"
+			],
+			"tag": "v1"
+		},
+		{
+			"new_sqlite_classes": [
+				"DORateLimitStore"
+			],
+			"tag": "v2"
+		}
+	],
+	"workers_dev": false,
+	"preview_urls": false
+}

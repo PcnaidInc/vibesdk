@@ -28,7 +28,6 @@ export interface UseImageUploadReturn {
 export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUploadReturn {
 	const {
 		maxImages = MAX_IMAGES_PER_MESSAGE,
-		maxSizeBytes = MAX_IMAGE_SIZE_BYTES,
 		onError,
 	} = options;
 
@@ -98,7 +97,7 @@ export function useImageUpload(options: UseImageUploadOptions = {}): UseImageUpl
 
 			reader.readAsDataURL(file);
 		});
-	}, [maxSizeBytes, onError]);
+	}, [onError]);
 
 	const addImages = useCallback(async (files: File[]) => {
 		setIsProcessing(true);

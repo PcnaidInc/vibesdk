@@ -71,6 +71,8 @@ export function useChat({
 	const shouldReconnectRef = useRef(true);
 	// Track the latest connection attempt to avoid handling stale socket events
 	const connectAttemptIdRef = useRef(0);
+	// Store latest connectWithRetry to break circular dep with handleConnectionFailure
+	const connectWithRetryRef = useRef<(wsUrl: string, opts?: { disableGenerate?: boolean; isRetry?: boolean }) => void>(() => {});
 	const [chatId, setChatId] = useState<string>();
 	const [messages, setMessages] = useState<ChatMessage[]>([
 		createAIMessage('main', 'Thinking...', true),
@@ -166,8 +168,9 @@ export function useChat({
 
 	// Create the WebSocket message handler
 	const handleWebSocketMessage = useCallback(
-		createWebSocketMessageHandler({
-			// State setters
+		(ws: WebSocket, message: WebSocketMessage) => {
+			const handler = createWebSocketMessageHandler({
+				// State setters
 			setFiles,
 			setPhaseTimeline,
 			setProjectStages,
@@ -207,7 +210,9 @@ export function useChat({
 			loadBootstrapFiles,
 			onDebugMessage,
 			onTerminalMessage,
-		} as HandleMessageDeps),
+		} as HandleMessageDeps);
+		return handler(ws, message);
+		},
 		[
 			isInitialStateRestored,
 			blueprint,
@@ -339,8 +344,10 @@ export function useChat({
 				handleConnectionFailure(wsUrl, disableGenerate, 'Connection setup failed');
 			}
 		},
-		[retryCount, maxRetries, retryTimeouts],
+		[retryCount, maxRetries, retryTimeouts, handleConnectionFailure, handleWebSocketMessage, urlChatId],
 	);
+
+    connectWithRetryRef.current = connectWithRetry;
 
 	// Handle connection failures with exponential backoff retry
 	const handleConnectionFailure = useCallback(
@@ -372,7 +379,7 @@ export function useChat({
 			sendMessage(createAIMessage('websocket_retrying', `🔄 Connection failed. Retrying in ${Math.ceil(actualDelay / 1000)} seconds... (attempt ${retryCount.current + 1}/${maxRetries + 1})\n\n❌ Reason: ${reason}`, true));
 
 			const timeoutId = setTimeout(() => {
-				connectWithRetry(wsUrl, { disableGenerate, isRetry: true });
+				connectWithRetryRef.current(wsUrl, { disableGenerate, isRetry: true });
 			}, actualDelay);
 			
 			retryTimeouts.current.push(timeoutId);
@@ -511,7 +518,7 @@ export function useChat({
 			}
 		}
 		init();
-	}, []);
+	}, [urlChatId, userQuery, agentMode, userImages, sendMessage, updateStage, connectWithRetry, onDebugMessage]);
 
     // Mount/unmount: enable/disable reconnection and clear pending retries
     useEffect(() => {

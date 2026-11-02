@@ -475,6 +475,17 @@ Cloudflare VibeSDK implements enterprise-grade security:
 
 ---
 
+## CI
+
+The CI workflow (`.github/workflows/ci.yml`) runs on every push to `main` and on pull requests targeting `main`. It checks:
+
+- **Lint** — `bun run lint`
+- **Type check** — `bun run typecheck`
+- **Test** — `bun run test`
+- **Build** — `bun run build`
+
+Concurrent runs on the same branch or PR are automatically cancelled to conserve resources.
+
 ## 🤝 Contributing
 
 Want to contribute to Cloudflare VibeSDK? Here's how:
