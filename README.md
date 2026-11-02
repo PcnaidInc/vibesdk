@@ -484,6 +484,8 @@ The CI workflow (`.github/workflows/ci.yml`) runs on every push to `main` and on
 - **Test** — `bun run test`
 - **Build** — `bun run build`
 
+Vitest uses the Cloudflare Workers pool configured in `vitest.config.ts`, with test bindings from `wrangler.test.jsonc`. The shared `test/setup.ts` hook restores mocked implementations after each test.
+
 Concurrent runs on the same branch or PR are automatically cancelled to conserve resources.
 
 ## 🤝 Contributing
